@@ -1,3 +1,3 @@
-module akorsi/dc
+module github.com/aKorsi/dc
 
 go 1.13
