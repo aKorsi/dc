@@ -4,21 +4,37 @@ type DependencyNameType string
 type DependencyGroupNameType string
 
 type DependencyContainer struct {
-	container map[string]interface{}
+	builderContainer map[string]func() interface{}
+	depContainer     map[string]interface{}
 }
 
 func NewDC() *DependencyContainer {
 	return &DependencyContainer{
-		container: map[string]interface{}{},
+		builderContainer: map[string]func() interface{}{},
+		depContainer:     map[string]interface{}{},
 	}
 }
 
-func (dic *DependencyContainer) SetDependency(dependencyName DependencyNameType, dependency interface{}) {
-	dic.SetDependencyWithGroup("", dependencyName, dependency)
+func (dic *DependencyContainer) SetDependency(dependencyName DependencyNameType, depFunc func() interface{}) {
+	dic.SetDependencyWithGroup("", dependencyName, depFunc)
 }
 
-func (dic *DependencyContainer) SetDependencyWithGroup(groupName DependencyGroupNameType, dependencyName DependencyNameType, dependency interface{}) {
-	dic.container[string(groupName)+string(dependencyName)] = dependency
+func (dic *DependencyContainer) SetDependencyWithGroup(groupName DependencyGroupNameType, dependencyName DependencyNameType, depFunc func() interface{}) {
+	dic.builderContainer[string(groupName)+string(dependencyName)] = depFunc
+}
+
+func (dic *DependencyContainer) GetSingletonDependency(dependencyName DependencyNameType) interface{} {
+	return dic.GetSingletonDependencyWithGroup("", dependencyName)
+}
+
+func (dic *DependencyContainer) GetSingletonDependencyWithGroup(groupName DependencyGroupNameType, dependencyName DependencyNameType) interface{} {
+	depData, _ := dic.depContainer[string(groupName)+string(dependencyName)]
+	if depData == nil {
+		builderFunc, _ := dic.builderContainer[string(groupName)+string(dependencyName)]
+		depData = builderFunc()
+		dic.depContainer[string(groupName)+string(dependencyName)] = depData
+	}
+	return depData
 }
 
 func (dic *DependencyContainer) GetDependency(dependencyName DependencyNameType) interface{} {
@@ -26,8 +42,8 @@ func (dic *DependencyContainer) GetDependency(dependencyName DependencyNameType)
 }
 
 func (dic *DependencyContainer) GetDependencyWithGroup(groupName DependencyGroupNameType, dependencyName DependencyNameType) interface{} {
-	dep, _ := dic.container[string(groupName)+string(dependencyName)]
-	return dep
+	depFunc, _ := dic.builderContainer[string(groupName)+string(dependencyName)]
+	return depFunc()
 }
 
 func (dic *DependencyContainer) DeleteDependency(dependencyName DependencyNameType) {
@@ -35,9 +51,11 @@ func (dic *DependencyContainer) DeleteDependency(dependencyName DependencyNameTy
 }
 
 func (dic *DependencyContainer) DeleteDependencyWithGroup(groupName DependencyGroupNameType, dependencyName DependencyNameType) {
-	delete(dic.container, string(groupName)+string(dependencyName))
+	delete(dic.depContainer, string(groupName)+string(dependencyName))
+	delete(dic.builderContainer, string(groupName)+string(dependencyName))
 }
 
 func (dic *DependencyContainer) DeleteAll() {
-	dic.container = map[string]interface{}{}
+	dic.builderContainer = map[string]func() interface{}{}
+	dic.depContainer = map[string]interface{}{}
 }
