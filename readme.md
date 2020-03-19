@@ -13,7 +13,7 @@ func main(){
 	container := dc.NewDC()
 
 	// set a dependency
-	container.SetDependency(MyDependencyName, smsService.NewMySMSService())
+	container.SetDependency(MyDependencyName, smsService.NewMySMSService)
 
 	// get a dependency
 	myService := container.GetDependency(MyDependencyName).(services.ISMSService)
