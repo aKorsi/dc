@@ -8,18 +8,18 @@ package main
 import "github.com/aKorsi/dc"
 
 func main(){
-    const MyDependencyName dc.DependencyNameType = "sms.service"
-
 	container := dc.NewDC()
 
 	// set a dependency
-	container.SetDependency(MyDependencyName, smsService.NewMySMSService)
+	container.SetDependency("sms.service", func() interface{} {
+        return sms.NewService() 
+    })
 
 	// get a dependency
-	myService := container.GetDependency(MyDependencyName).(services.ISMSService)
+	myService := container.GetDependency("sms.service").(services.ISMSService)
 
 	// delete a dependency
-	container.DeleteDependency(MyDependencyName)
+	container.DeleteDependency("sms.service")
 
 	// clear container
 	container.DeleteAll()
