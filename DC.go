@@ -5,7 +5,19 @@ type dependencyContainer struct {
 	depContainer     map[string]interface{}
 }
 
-func NewDC() *dependencyContainer {
+type Container interface {
+	SetDependency(dependencyName string, depFunc func() interface{})
+	SetDependencyWithGroup(groupName string, dependencyName string, depFunc func() interface{})
+	GetSingletonDependency(dependencyName string) interface{}
+	GetSingletonDependencyWithGroup(groupName string, dependencyName string) interface{}
+	GetDependency(dependencyName string) interface{}
+	GetDependencyWithGroup(groupName string, dependencyName string) interface{}
+	DeleteDependency(dependencyName string)
+	DeleteDependencyWithGroup(groupName string, dependencyName string)
+	DeleteAll()
+}
+
+func NewDC() Container {
 	return &dependencyContainer{
 		builderContainer: map[string]func() interface{}{},
 		depContainer:     map[string]interface{}{},
