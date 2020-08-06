@@ -65,6 +65,6 @@ func (dic *dependencyContainer) DeleteDependencyWithGroup(groupName string, depe
 }
 
 func (dic *dependencyContainer) DeleteAll() {
-	dic.builderContainer = map[string]func() interface{}{}
-	dic.depContainer = map[string]interface{}{}
+	dic.builderContainer = nil
+	dic.depContainer = nil
 }
